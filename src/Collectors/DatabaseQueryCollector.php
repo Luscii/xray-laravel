@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Napp\Xray\Collectors;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\Query\Expression;
 use Napp\Xray\Segments\SqlSegment;
 
 class DatabaseQueryCollector extends EventsCollector
@@ -13,6 +16,9 @@ class DatabaseQueryCollector extends EventsCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            if ($query->sql instanceof Expression) {
+                $query->sql = $query->sql->getValue();
+            }
             $this->handleQueryReport($query->sql, $query->bindings, $query->time, $query->connection);
         });
 
