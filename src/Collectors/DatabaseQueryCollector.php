@@ -16,10 +16,8 @@ class DatabaseQueryCollector extends EventsCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
-            if ($query->sql instanceof Expression) {
-                $query->sql = $query->sql->getValue();
-            }
-            $this->handleQueryReport($query->sql, $query->bindings, $query->time, $query->connection);
+            $sql = $query->sql instanceof Expression ? $query->sql->getValue() : $query->sql;
+            $this->handleQueryReport($sql, $query->bindings, $query->time, $query->connection);
         });
 
         $this->bindingsEnabled = config('xray.db_bindings');
